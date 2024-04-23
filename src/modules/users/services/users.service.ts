@@ -1,15 +1,20 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schemas/user-schema';
+import { User, UserDocument } from '../schemas/user-schema';
 import { Model } from 'mongoose';
-import { UpdateUserDto, UserDto } from './dtos/user-dto';
+import { UpdateUserDto, UserDto } from '../dtos/user-dto';
+import { CrudModel } from 'src/models/crud.model';
 
 @Injectable()
-export class UsersService {
-  constructor(@InjectModel(User.name) private userModel = Model<User>) {}
+export class UsersService extends CrudModel<UserDocument> {
+  constructor(
+    @InjectModel(User.name) protected userModel: Model<UserDocument>
+  ) {
+    super(userModel);
+  }
 
   async getUsers() {
-    return this.userModel.find();
+    return this.find({});
   }
 
   async createUser(user: UserDto) {
@@ -22,7 +27,7 @@ export class UsersService {
       throw new ConflictException('El correo no esta disponible');
     }
 
-    return this.userModel.create(user);
+    return this.create(user);
   }
 
   async updateUser(user: UpdateUserDto) {
@@ -32,10 +37,14 @@ export class UsersService {
       throw new ConflictException('El correo no esta disponible');
     }
     if (userExist) {
-      await userExist.updateOne({
-        email: user.email,
-        username: user.username,
-      });
+      await this.update(
+        { _id: user.id },
+
+        {
+          email: user.email,
+          username: user.username,
+        }
+      );
       return userExist;
     } else {
       throw new ConflictException('No se puedo actualizar el usuario');
@@ -45,27 +54,23 @@ export class UsersService {
   async deleteUser(id: string) {
     const userExist = await this.findUserById(id);
     if (userExist) {
-      return userExist.deleteOne();
+      return this.delete(userExist);
     } else {
       throw new ConflictException('No se pudo eliminar el usuario');
     }
   }
 
   private findUserById(id: string) {
-    return this.userModel.findById({
-      _id: id,
-    });
+    return this.findById(id);
   }
 
   private findUserByName(name: string) {
-    return this.userModel.findOne({
+    return this.findOne({
       name,
     });
   }
 
   private findUserByEmail(email: string) {
-    return this.userModel.findOne({
-      email,
-    });
+    return this.findOne({ email });
   }
 }

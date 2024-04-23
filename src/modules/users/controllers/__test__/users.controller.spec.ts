@@ -1,13 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from './users.controller';
+import { UsersController } from '../users.controller';
+import { UsersModule } from '../../users.module';
+import { User } from '../../schemas/user-schema';
+import { getModelToken } from '@nestjs/mongoose';
 
 describe('UsersController', () => {
   let controller: UsersController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UsersController],
-    }).compile();
+      imports: [UsersModule],
+    })
+      .overrideProvider(getModelToken(User.name))
+      .useValue(jest.fn())
+      .compile();
 
     controller = module.get<UsersController>(UsersController);
   });
