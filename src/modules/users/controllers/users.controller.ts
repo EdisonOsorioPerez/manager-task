@@ -9,9 +9,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateUserDto, UserDto } from './dtos/user-dto';
+import { UpdateUserDto, UserDto } from '../dtos/user-dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { UsersService } from '../services/users.service';
 
 @Controller('api/v1/users')
 export class UsersController {
