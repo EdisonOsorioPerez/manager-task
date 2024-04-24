@@ -1,5 +1,5 @@
 import { ConflictException } from '@nestjs/common';
-import { FilterQuery, Model, UpdateQuery } from 'mongoose';
+import { Document, FilterQuery, Model, UpdateQuery } from 'mongoose';
 
 export abstract class CrudModel<T extends Document> {
   constructor(protected readonly crudModel: Model<T>) {}
@@ -16,7 +16,7 @@ export abstract class CrudModel<T extends Document> {
     });
   }
 
-  async find(filter: FilterQuery<T>) {
+  async find(filter: FilterQuery<T>): Promise<T[]> {
     return await this.crudModel.find(filter).catch(() => {
       throw new ConflictException('No se pudo crear el registro en la db');
     });
@@ -34,8 +34,8 @@ export abstract class CrudModel<T extends Document> {
     });
   }
 
-  async delete(data: any): Promise<any> {
-    return await data.deleteOne().catch((err) => {
+  async delete(filter: FilterQuery<T>): Promise<any> {
+    return await this.crudModel.findByIdAndDelete(filter).catch((err) => {
       throw new ConflictException('No se pudo realizar la acción en la db');
     });
   }

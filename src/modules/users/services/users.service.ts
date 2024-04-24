@@ -1,15 +1,13 @@
+import { CrudModel } from '../../../models/crud.model';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../schemas/user-schema';
+import { User } from '../schemas/user-schema';
 import { Model } from 'mongoose';
 import { UpdateUserDto, UserDto } from '../dtos/user-dto';
-import { CrudModel } from 'src/models/crud.model';
 
 @Injectable()
-export class UsersService extends CrudModel<UserDocument> {
-  constructor(
-    @InjectModel(User.name) protected userModel: Model<UserDocument>
-  ) {
+export class UsersService extends CrudModel<User> {
+  constructor(@InjectModel(User.name) protected userModel: Model<User>) {
     super(userModel);
   }
 
@@ -54,7 +52,7 @@ export class UsersService extends CrudModel<UserDocument> {
   async deleteUser(id: string) {
     const userExist = await this.findUserById(id);
     if (userExist) {
-      return this.delete(userExist);
+      return this.delete({ _id: userExist._id });
     } else {
       throw new ConflictException('No se pudo eliminar el usuario');
     }
